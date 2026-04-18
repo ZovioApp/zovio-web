@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: #00D4AA;
+  --color-primary-dark: #00B894;
+  --color-accent: #4ECDC4;
+  --color-bg: #0A1628;
+  --color-bg-light: #0F1F38;
+  --color-card: #152240;
+  --color-surface: #1E3354;
+  --color-border: #1E3354;
+  --color-text: #FFFFFF;
+  --color-text-secondary: #8B9DC3;
+  --color-text-muted: #5A6F94;
+  --color-success: #00D4AA;
+  --color-warning: #FFB347;
+  --color-error: #FF6B6B;
+  --color-info: #45B7D1;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.brand-gradient {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
