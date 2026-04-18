@@ -4,29 +4,31 @@ export default function Invite() {
   const { code } = useParams<{ code: string }>();
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-5 py-10">
-      <div className="max-w-[440px] w-full text-center">
-        <h1 className="brand-gradient text-4xl font-bold mb-2">Zovio</h1>
-        <p className="text-[var(--color-text-muted)] text-sm mb-8">
-          Academy &amp; Class Management
-        </p>
+    <div className="min-h-screen flex items-center justify-center px-6 py-12">
+      <div className="max-w-[440px] w-full">
+        <div className="text-center mb-6">
+          <span className="wordmark text-xl">Zovio</span>
+        </div>
 
-        <div className="bg-white/5 border border-white/10 rounded-2xl px-6 py-8 mb-6">
-          <div className="text-5xl mb-4">{'\u{1F3C3}'}</div>
-          <h2 className="text-2xl font-bold mb-3">You've been invited!</h2>
-          <p className="text-[var(--color-text-secondary)] text-[15px] leading-relaxed mb-7">
-            You've been invited to join an academy on Zovio. Follow these steps
-            to get started.
+        <div className="bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-xl shadow-[var(--shadow-sm)] p-8">
+          <h1 className="text-xl font-semibold text-[var(--color-text)] mb-2 text-center">
+            You've been invited
+          </h1>
+          <p className="text-sm text-[var(--color-text-secondary)] text-center mb-7">
+            Follow these steps to join the academy on Zovio.
           </p>
 
-          <ol className="text-left mb-7 space-y-[18px]">
+          <ol className="space-y-4 mb-6">
             {[
               {
                 n: 1,
                 text: (
                   <>
-                    Download the <strong className="text-white">Zovio app</strong>{' '}
-                    from the App Store or Play Store
+                    Download the{' '}
+                    <strong className="text-[var(--color-text)]">
+                      Zovio app
+                    </strong>{' '}
+                    from the App Store or Play Store.
                   </>
                 ),
               },
@@ -35,23 +37,27 @@ export default function Invite() {
                 text: (
                   <>
                     Open Zovio and{' '}
-                    <strong className="text-white">
+                    <strong className="text-[var(--color-text)]">
                       sign up with the email
                     </strong>{' '}
-                    this invitation was sent to
+                    this invitation was sent to.
                   </>
                 ),
               },
               {
                 n: 3,
-                text: <>You'll automatically join the academy once registered</>,
+                text: (
+                  <>
+                    You'll automatically join the academy once registered.
+                  </>
+                ),
               },
             ].map((step) => (
-              <li key={step.n} className="flex items-start gap-3.5">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[rgba(0,212,170,0.15)] text-[var(--color-primary)] text-[13px] font-bold flex items-center justify-center">
+              <li key={step.n} className="flex items-start gap-3">
+                <span className="shrink-0 w-6 h-6 rounded-full bg-[var(--color-primary-subtle-bg)] text-[var(--color-primary-hover)] text-xs font-semibold flex items-center justify-center">
                   {step.n}
                 </span>
-                <span className="text-sm text-[var(--color-text-secondary)] leading-snug pt-0.5">
+                <span className="text-sm text-[var(--color-text-secondary)] leading-relaxed pt-0.5">
                   {step.text}
                 </span>
               </li>
@@ -59,17 +65,17 @@ export default function Invite() {
           </ol>
 
           {code && (
-            <p className="text-xs text-[var(--color-text-muted)] mb-4">
-              Invite code:{' '}
-              <code className="text-[var(--color-primary)] font-mono">
+            <p className="text-center text-xs text-[var(--color-text-muted)] pt-4 border-t border-[var(--color-border-subtle)]">
+              Invite code{' '}
+              <code className="text-[var(--color-text-secondary)] font-mono bg-[var(--color-bg-subtle)] px-1.5 py-0.5 rounded">
                 {code}
               </code>
             </p>
           )}
         </div>
 
-        <p className="text-xs text-[var(--color-text-muted)]">
-          &copy; 2026 Zovio. All rights reserved.
+        <p className="text-center text-xs text-[var(--color-text-muted)] mt-5">
+          &copy; 2026 Zovio
         </p>
       </div>
     </div>

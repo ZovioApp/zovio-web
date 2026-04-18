@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { ApiError } from '../lib/api';
+import { Button } from '../components/Button';
+import { ErrorMessage } from '../components/ErrorMessage';
 
 export default function Login() {
   const { login } = useAuth();
@@ -29,20 +31,20 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-5 py-10">
-      <div className="max-w-[420px] w-full">
-        <div className="text-center mb-10">
-          <Link to="/" className="brand-gradient text-4xl font-bold inline-block">
+    <div className="min-h-screen flex items-center justify-center px-6 py-12">
+      <div className="max-w-[400px] w-full">
+        <div className="text-center mb-8">
+          <Link to="/" className="wordmark text-xl">
             Zovio
           </Link>
-          <p className="text-[var(--color-text-muted)] text-sm mt-2">
+          <p className="text-sm text-[var(--color-text-muted)] mt-1.5">
             Sign in to manage your academy
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-8 space-y-5"
+          className="bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-lg shadow-[var(--shadow-sm)] p-6 space-y-4"
           noValidate
         >
           <Field label="Email" htmlFor="email">
@@ -71,25 +73,20 @@ export default function Login() {
             />
           </Field>
 
-          {error && (
-            <p
-              role="alert"
-              className="text-[var(--color-error)] text-sm bg-[rgba(255,107,107,0.1)] border border-[rgba(255,107,107,0.3)] rounded-[10px] px-3 py-2"
-            >
-              {error}
-            </p>
-          )}
+          {error && <ErrorMessage message={error} />}
 
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            size="md"
             disabled={isSubmitting}
-            className="w-full rounded-[10px] bg-[var(--color-primary)] text-[var(--color-bg)] py-3.5 text-[15px] font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-default"
+            className="w-full"
           >
             {isSubmitting ? 'Signing in…' : 'Sign in'}
-          </button>
+          </Button>
         </form>
 
-        <p className="text-center text-xs text-[var(--color-text-muted)] mt-6">
+        <p className="text-center text-xs text-[var(--color-text-muted)] mt-5">
           Coaches and athletes — please use the Zovio mobile app.
         </p>
       </div>
@@ -98,7 +95,7 @@ export default function Login() {
 }
 
 const inputClasses =
-  'w-full rounded-[10px] border border-white/10 bg-white/5 px-4 py-3 text-[15px] text-white outline-none transition-colors focus:border-[var(--color-primary)] disabled:opacity-60';
+  'w-full rounded-md border border-[var(--color-border)] bg-[var(--color-bg-elevated)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] outline-none transition-colors focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 disabled:opacity-60';
 
 function Field({
   label,
@@ -113,7 +110,7 @@ function Field({
     <div>
       <label
         htmlFor={htmlFor}
-        className="block text-xs font-semibold text-[var(--color-text-secondary)] mb-2 tracking-wide uppercase"
+        className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5"
       >
         {label}
       </label>

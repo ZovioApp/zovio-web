@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  payoutsApi,
-  type PayoutStatus,
-} from '../../../lib/academies';
+import { payoutsApi, type PayoutStatus } from '../../../lib/academies';
 import { LoadingScreen } from '../../../components/LoadingScreen';
 import { ErrorMessage } from '../../../components/ErrorMessage';
+import { Button } from '../../../components/Button';
 
 export default function Payouts() {
   const { academyId } = useParams<{ academyId: string }>();
@@ -53,67 +51,78 @@ export default function Payouts() {
     }
   };
 
+  const activeConnect =
+    status.payoutMode === 'stripe_connect' && status.onboardingComplete;
+  const pendingConnect =
+    status.payoutMode === 'stripe_connect' && !status.onboardingComplete;
+
   return (
-    <div>
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold mb-1">Payouts</h1>
-        <p className="text-[var(--color-text-muted)] text-sm">
+    <div className="space-y-6">
+      <header>
+        <h1 className="text-2xl font-semibold text-[var(--color-text)]">
+          Payouts
+        </h1>
+        <p className="text-sm text-[var(--color-text-muted)] mt-1">
           Connect a Stripe account so Zovio can route paid session fees to you.
           Only the primary owner can change this.
         </p>
       </header>
 
-      <section className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 max-w-[560px]">
-        <div className="flex items-start justify-between gap-4 mb-5">
+      <section className="bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-lg p-6 max-w-[560px]">
+        <div className="flex items-start justify-between gap-4 mb-3">
           <div>
-            <div className="text-xs uppercase tracking-wide text-[var(--color-text-muted)] mb-1">
+            <div className="text-[11px] uppercase tracking-wider font-medium text-[var(--color-text-muted)] mb-1">
               Current mode
             </div>
-            <div className="text-2xl font-bold">
+            <div className="text-xl font-semibold text-[var(--color-text)]">
               {status.payoutMode === 'stripe_connect'
                 ? 'Stripe Connect'
-                : 'Manual'}
+                : 'Manual settlement'}
             </div>
           </div>
           <StatusBadge
-            mode={status.payoutMode}
-            onboardingComplete={status.onboardingComplete}
+            activeConnect={activeConnect}
+            pendingConnect={pendingConnect}
           />
         </div>
 
-        <p className="text-sm text-[var(--color-text-secondary)] mb-6">
-          {status.payoutMode === 'stripe_connect' && status.onboardingComplete
+        <p className="text-sm text-[var(--color-text-secondary)] mb-5">
+          {activeConnect
             ? 'Card payments from students are routed to your connected Stripe account, net of Zovio platform fees.'
-            : status.payoutMode === 'stripe_connect'
-              ? 'A Stripe account is linked, but onboarding is not complete. Click below to finish it.'
-              : 'This academy runs on manual settlement. Enrolments and attendance still work; students just don\u2019t pay through the platform.'}
+            : pendingConnect
+              ? 'A Stripe account is linked, but onboarding is not complete. Finish it to enable card charges.'
+              : 'This academy runs on manual settlement. Enrolments and attendance still work — students just don\u2019t pay through the platform.'}
         </p>
 
-        {error && <div className="mb-4"><ErrorMessage message={error} /></div>}
+        {error && (
+          <div className="mb-4">
+            <ErrorMessage message={error} />
+          </div>
+        )}
 
-        <div className="flex flex-col sm:flex-row gap-3">
-          <button
-            type="button"
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="primary"
+            size="md"
             onClick={() => void onboard()}
             disabled={isWorking}
-            className="rounded-[10px] bg-[var(--color-primary)] text-[var(--color-bg)] px-5 py-2.5 text-sm font-semibold hover:opacity-90 disabled:opacity-50"
           >
             {status.stripeConnectedAccountId
-              ? status.onboardingComplete
+              ? activeConnect
                 ? 'Manage Stripe account'
                 : 'Finish Stripe onboarding'
               : 'Connect with Stripe'}
-          </button>
+          </Button>
 
           {status.stripeConnectedAccountId && (
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="md"
               onClick={() => void unlink()}
               disabled={isWorking}
-              className="rounded-[10px] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-white hover:border-white/20 px-5 py-2.5 text-sm font-semibold disabled:opacity-50"
             >
-              Switch back to manual
-            </button>
+              Switch to manual
+            </Button>
           )}
         </div>
       </section>
@@ -122,34 +131,33 @@ export default function Payouts() {
 }
 
 function StatusBadge({
-  mode,
-  onboardingComplete,
+  activeConnect,
+  pendingConnect,
 }: {
-  mode: PayoutStatus['payoutMode'];
-  onboardingComplete: boolean;
+  activeConnect: boolean;
+  pendingConnect: boolean;
 }) {
-  const { colour, label } =
-    mode === 'stripe_connect' && onboardingComplete
+  const { label, colour } = activeConnect
+    ? {
+        label: 'Active',
+        colour:
+          'bg-[var(--color-success-subtle-bg)] text-[var(--color-success)] border-[var(--color-success-subtle-border)]',
+      }
+    : pendingConnect
       ? {
+          label: 'Onboarding',
           colour:
-            'text-[var(--color-primary)] bg-[rgba(0,212,170,0.12)] border-[rgba(0,212,170,0.3)]',
-          label: 'Active',
+            'bg-[var(--color-warning-subtle-bg)] text-[var(--color-warning)] border-[var(--color-warning-subtle-border)]',
         }
-      : mode === 'stripe_connect'
-        ? {
-            colour:
-              'text-[var(--color-warning)] bg-[rgba(255,179,71,0.1)] border-[rgba(255,179,71,0.3)]',
-            label: 'Onboarding',
-          }
-        : {
-            colour:
-              'text-[var(--color-text-secondary)] bg-white/5 border-white/10',
-            label: 'Manual',
-          };
+      : {
+          label: 'Manual',
+          colour:
+            'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border-[var(--color-border)]',
+        };
 
   return (
     <span
-      className={`text-xs uppercase tracking-wide font-semibold px-3 py-1 rounded-full border ${colour}`}
+      className={`inline-flex items-center text-[11px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border ${colour}`}
     >
       {label}
     </span>

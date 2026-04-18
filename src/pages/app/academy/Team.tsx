@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   academiesApi,
@@ -7,6 +7,7 @@ import {
 } from '../../../lib/academies';
 import { LoadingScreen } from '../../../components/LoadingScreen';
 import { ErrorMessage } from '../../../components/ErrorMessage';
+import { Button } from '../../../components/Button';
 import { api } from '../../../lib/api';
 
 export default function Team() {
@@ -33,10 +34,12 @@ export default function Team() {
   const pending = members.filter((m) => m.status === 'pending');
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold mb-1">Team</h1>
-        <p className="text-[var(--color-text-muted)] text-sm">
+        <h1 className="text-2xl font-semibold text-[var(--color-text)]">
+          Team
+        </h1>
+        <p className="text-sm text-[var(--color-text-muted)] mt-1">
           Co-owners, coaches, and athletes for this academy.
         </p>
       </header>
@@ -44,13 +47,15 @@ export default function Team() {
       <InviteCard academyId={academyId} onInvited={load} />
 
       <MemberSection
-        title={`Active members (${active.length})`}
+        title="Active members"
+        count={active.length}
         members={active}
       />
 
       {pending.length > 0 && (
         <MemberSection
-          title={`Pending invitations (${pending.length})`}
+          title="Pending invitations"
+          count={pending.length}
           members={pending}
         />
       )}
@@ -71,14 +76,14 @@ function InviteCard({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
     setSuccess(null);
     try {
       await api('POST', `/api/academies/${academyId}/invite`, { email, role });
-      setSuccess(`Invited ${email} as ${role.replace('_', ' ')}.`);
+      setSuccess(`Invited ${email}.`);
       setEmail('');
       onInvited();
     } catch (err) {
@@ -89,18 +94,22 @@ function InviteCard({
   };
 
   return (
-    <section className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6">
-      <h2 className="text-lg font-semibold mb-1">Invite a member</h2>
-      <p className="text-sm text-[var(--color-text-muted)] mb-5">
-        Co-owner invitations can only be sent by the primary owner.
-      </p>
+    <section className="bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-lg p-5">
+      <div className="mb-4">
+        <h2 className="text-base font-semibold text-[var(--color-text)]">
+          Invite a member
+        </h2>
+        <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+          Co-owner invitations require primary-owner rights.
+        </p>
+      </div>
 
       <form
         onSubmit={submit}
-        className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end"
+        className="flex flex-col sm:flex-row gap-3 sm:items-end"
       >
         <label className="flex-1">
-          <span className="block text-xs font-semibold text-[var(--color-text-secondary)] mb-2 tracking-wide uppercase">
+          <span className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">
             Email
           </span>
           <input
@@ -108,11 +117,12 @@ function InviteCard({
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-[10px] border border-white/10 bg-white/5 px-4 py-3 text-[15px] text-white outline-none focus:border-[var(--color-primary)]"
+            placeholder="name@example.com"
+            className="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-bg-elevated)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
           />
         </label>
         <label>
-          <span className="block text-xs font-semibold text-[var(--color-text-secondary)] mb-2 tracking-wide uppercase">
+          <span className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">
             Role
           </span>
           <select
@@ -120,25 +130,25 @@ function InviteCard({
             onChange={(e) =>
               setRole(e.target.value as 'owner' | 'coach' | 'athlete')
             }
-            className="w-full sm:w-auto rounded-[10px] border border-white/10 bg-white/5 px-4 py-3 text-[15px] text-white outline-none"
+            className="w-full sm:w-auto rounded-md border border-[var(--color-border)] bg-[var(--color-bg-elevated)] px-3 py-2 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
           >
             <option value="athlete">Athlete</option>
             <option value="coach">Coach</option>
             <option value="owner">Co-owner</option>
           </select>
         </label>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="rounded-[10px] bg-[var(--color-primary)] text-[var(--color-bg)] px-5 py-3 text-sm font-semibold hover:opacity-90 disabled:opacity-50"
-        >
+        <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>
           {isSubmitting ? 'Sending…' : 'Send invite'}
-        </button>
+        </Button>
       </form>
 
-      {error && <div className="mt-3"><ErrorMessage message={error} /></div>}
+      {error && (
+        <div className="mt-3">
+          <ErrorMessage message={error} />
+        </div>
+      )}
       {success && (
-        <p className="mt-3 text-sm text-[var(--color-primary)]">{success}</p>
+        <p className="mt-3 text-xs text-[var(--color-success)]">{success}</p>
       )}
     </section>
   );
@@ -146,15 +156,24 @@ function InviteCard({
 
 function MemberSection({
   title,
+  count,
   members,
 }: {
   title: string;
+  count: number;
   members: AcademyMember[];
 }) {
   return (
     <section>
-      <h2 className="text-lg font-semibold mb-4">{title}</h2>
-      <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl overflow-hidden">
+      <div className="mb-3 flex items-baseline gap-2">
+        <h2 className="text-base font-semibold text-[var(--color-text)]">
+          {title}
+        </h2>
+        <span className="text-xs text-[var(--color-text-muted)] tnum">
+          {count}
+        </span>
+      </div>
+      <div className="bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-lg overflow-hidden">
         {members.length === 0 ? (
           <p className="px-4 py-6 text-sm text-[var(--color-text-muted)] text-center">
             No members.
@@ -164,10 +183,10 @@ function MemberSection({
             {members.map((m) => (
               <li
                 key={m.id}
-                className="border-t border-[var(--color-border)] first:border-t-0 px-5 py-4 flex items-center gap-4"
+                className="border-t border-[var(--color-border-subtle)] first:border-t-0 px-5 py-3.5 flex items-center gap-3"
               >
                 <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold text-[var(--color-bg)]"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white shrink-0"
                   style={{
                     backgroundColor:
                       m.user?.avatarColor ?? 'var(--color-primary)',
@@ -178,7 +197,7 @@ function MemberSection({
                     .toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate">
+                  <div className="text-sm font-medium text-[var(--color-text)] truncate">
                     {m.user?.name ?? m.invitedEmail ?? 'Pending user'}
                   </div>
                   <div className="text-xs text-[var(--color-text-muted)] truncate">
@@ -196,18 +215,33 @@ function MemberSection({
 }
 
 function RoleBadge({ role }: { role: AcademyRole }) {
-  const label = role.replace('_', ' ');
-  const colour =
+  const { label, colour } =
     role === 'primary_owner'
-      ? 'text-[var(--color-primary)] bg-[rgba(0,212,170,0.12)] border-[rgba(0,212,170,0.3)]'
+      ? {
+          label: 'Primary owner',
+          colour:
+            'bg-[var(--color-primary-subtle-bg)] text-[var(--color-primary-hover)] border-[var(--color-primary-subtle-border)]',
+        }
       : role === 'owner'
-        ? 'text-[var(--color-info)] bg-[rgba(69,183,209,0.12)] border-[rgba(69,183,209,0.3)]'
+        ? {
+            label: 'Co-owner',
+            colour:
+              'bg-[var(--color-info-subtle-bg)] text-[var(--color-info)] border-[var(--color-info-subtle-border)]',
+          }
         : role === 'coach'
-          ? 'text-[var(--color-warning)] bg-[rgba(255,179,71,0.1)] border-[rgba(255,179,71,0.3)]'
-          : 'text-[var(--color-text-secondary)] bg-white/5 border-white/10';
+          ? {
+              label: 'Coach',
+              colour:
+                'bg-[var(--color-warning-subtle-bg)] text-[var(--color-warning)] border-[var(--color-warning-subtle-border)]',
+            }
+          : {
+              label: 'Athlete',
+              colour:
+                'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border-[var(--color-border)]',
+            };
   return (
     <span
-      className={`text-xs uppercase tracking-wide font-semibold px-2 py-0.5 rounded border ${colour}`}
+      className={`shrink-0 inline-flex items-center text-[11px] font-medium uppercase tracking-wider px-2 py-0.5 rounded border ${colour}`}
     >
       {label}
     </span>

@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  academiesApi,
-  type SessionSummary,
-} from '../../../lib/academies';
+import { academiesApi, type SessionSummary } from '../../../lib/academies';
 import { LoadingScreen } from '../../../components/LoadingScreen';
 import { ErrorMessage } from '../../../components/ErrorMessage';
 
@@ -26,34 +23,29 @@ export default function Sessions() {
   if (!sessions) return <LoadingScreen />;
 
   return (
-    <div>
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold mb-1">Sessions</h1>
-        <p className="text-[var(--color-text-muted)] text-sm">
-          Read-only view. Create and edit sessions from the Zovio mobile app.
+    <div className="space-y-6">
+      <header>
+        <h1 className="text-2xl font-semibold text-[var(--color-text)]">
+          Sessions
+        </h1>
+        <p className="text-sm text-[var(--color-text-muted)] mt-1">
+          Read-only. Create and edit sessions from the Zovio mobile app.
         </p>
       </header>
 
       {sessions.length === 0 ? (
-        <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl px-4 py-10 text-center text-[var(--color-text-muted)] text-sm">
+        <div className="bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-lg px-4 py-10 text-center text-sm text-[var(--color-text-muted)]">
           No sessions yet.
         </div>
       ) : (
-        <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl overflow-x-auto">
-          <table className="w-full text-sm min-w-[640px]">
+        <div className="bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-lg overflow-x-auto">
+          <table className="w-full min-w-[640px]">
             <thead>
               <tr>
-                {[
-                  'Date',
-                  'Time',
-                  'Title',
-                  'Mode',
-                  'Fee',
-                  'Status',
-                ].map((c) => (
+                {['Date', 'Time', 'Title', 'Mode', 'Fee', 'Status'].map((c) => (
                   <th
                     key={c}
-                    className="text-left text-xs uppercase tracking-wide text-[var(--color-text-muted)] font-semibold px-4 py-3"
+                    className="text-left text-[11px] uppercase tracking-wider font-medium text-[var(--color-text-muted)] px-4 py-2.5"
                   >
                     {c}
                   </th>
@@ -64,22 +56,26 @@ export default function Sessions() {
               {sessions.map((s) => (
                 <tr
                   key={s.id}
-                  className="border-t border-[var(--color-border)]"
+                  className="border-t border-[var(--color-border-subtle)]"
                 >
-                  <td className="py-3 px-4 whitespace-nowrap">{s.date}</td>
-                  <td className="py-3 px-4 whitespace-nowrap">
+                  <td className="py-2.5 px-4 text-sm tnum text-[var(--color-text-secondary)] whitespace-nowrap">
+                    {s.date}
+                  </td>
+                  <td className="py-2.5 px-4 text-sm tnum text-[var(--color-text-secondary)] whitespace-nowrap">
                     {s.startTime} – {s.endTime}
                   </td>
-                  <td className="py-3 px-4">{s.title}</td>
-                  <td className="py-3 px-4">
+                  <td className="py-2.5 px-4 text-sm text-[var(--color-text)]">
+                    {s.title}
+                  </td>
+                  <td className="py-2.5 px-4">
                     <ModeBadge mode={s.paymentMode} />
                   </td>
-                  <td className="py-3 px-4">
+                  <td className="py-2.5 px-4 text-sm tnum text-[var(--color-text-secondary)]">
                     {parseFloat(s.fee) === 0
                       ? 'Free'
                       : `${s.fee} ${s.currency}`}
                   </td>
-                  <td className="py-3 px-4">
+                  <td className="py-2.5 px-4">
                     <StatusBadge status={s.status} />
                   </td>
                 </tr>
@@ -97,13 +93,13 @@ function ModeBadge({ mode }: { mode: SessionSummary['paymentMode'] }) {
     mode === 'card' ? 'Card' : mode === 'manual' ? 'Manual' : 'Free';
   const colour =
     mode === 'card'
-      ? 'text-[var(--color-primary)] bg-[rgba(0,212,170,0.12)] border-[rgba(0,212,170,0.3)]'
+      ? 'bg-[var(--color-primary-subtle-bg)] text-[var(--color-primary-hover)] border-[var(--color-primary-subtle-border)]'
       : mode === 'manual'
-        ? 'text-[var(--color-warning)] bg-[rgba(255,179,71,0.1)] border-[rgba(255,179,71,0.3)]'
-        : 'text-[var(--color-text-secondary)] bg-white/5 border-white/10';
+        ? 'bg-[var(--color-warning-subtle-bg)] text-[var(--color-warning)] border-[var(--color-warning-subtle-border)]'
+        : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border-[var(--color-border)]';
   return (
     <span
-      className={`text-xs uppercase tracking-wide font-semibold px-2 py-0.5 rounded border ${colour}`}
+      className={`inline-flex items-center text-[11px] font-medium uppercase tracking-wider px-2 py-0.5 rounded border ${colour}`}
     >
       {label}
     </span>
@@ -113,13 +109,13 @@ function ModeBadge({ mode }: { mode: SessionSummary['paymentMode'] }) {
 function StatusBadge({ status }: { status: SessionSummary['status'] }) {
   const colour =
     status === 'scheduled'
-      ? 'text-[var(--color-info)] bg-[rgba(69,183,209,0.12)] border-[rgba(69,183,209,0.3)]'
+      ? 'bg-[var(--color-info-subtle-bg)] text-[var(--color-info)] border-[var(--color-info-subtle-border)]'
       : status === 'completed'
-        ? 'text-[var(--color-primary)] bg-[rgba(0,212,170,0.12)] border-[rgba(0,212,170,0.3)]'
-        : 'text-[var(--color-error)] bg-[rgba(255,107,107,0.1)] border-[rgba(255,107,107,0.3)]';
+        ? 'bg-[var(--color-success-subtle-bg)] text-[var(--color-success)] border-[var(--color-success-subtle-border)]'
+        : 'bg-[var(--color-error-subtle-bg)] text-[var(--color-error)] border-[var(--color-error-subtle-border)]';
   return (
     <span
-      className={`text-xs uppercase tracking-wide font-semibold px-2 py-0.5 rounded border ${colour}`}
+      className={`inline-flex items-center text-[11px] font-medium uppercase tracking-wider px-2 py-0.5 rounded border ${colour}`}
     >
       {status}
     </span>

@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { Button } from '../../components/Button';
+import { CreateAcademyModal } from '../../components/CreateAcademyModal';
 
 interface Props {
   hasAnyMembership: boolean;
@@ -6,62 +9,92 @@ interface Props {
 
 export default function LockScreen({ hasAnyMembership }: Props) {
   const { user, logout } = useAuth();
-
-  const headline = hasAnyMembership
-    ? 'Web access for coaches and athletes is coming soon'
-    : 'No academies yet';
-
-  const message = hasAnyMembership
-    ? "You're signed in, but the Zovio web dashboard is for academy owners today. Manage sessions, mark attendance, and pay fees in the Zovio mobile app."
-    : "You're not a member of any academy yet. Once you're invited or create your own, you'll see it here.";
+  const [createOpen, setCreateOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-12">
-      <div className="max-w-[480px] w-full text-center">
-        <h1 className="brand-gradient text-4xl font-bold mb-6">Zovio</h1>
+      <div className="max-w-[460px] w-full">
+        <div className="bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-xl shadow-[var(--shadow-sm)] p-8 text-center">
+          <h1 className="wordmark text-xl mb-5">Zovio</h1>
 
-        <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-8">
-          <div className="text-5xl mb-4" aria-hidden>
-            {'\u{1F4F1}'}
-          </div>
-          <h2 className="text-xl font-semibold mb-3">{headline}</h2>
-          <p className="text-[var(--color-text-secondary)] text-[15px] leading-relaxed mb-6">
-            {message}
-          </p>
-
-          {hasAnyMembership && (
-            <div className="space-y-3 mb-6">
-              <AppStoreButton
-                href="https://apps.apple.com/app/zovio"
-                label="Download for iOS"
-              />
-              <AppStoreButton
-                href="https://play.google.com/store/apps/details?id=com.zovio.app"
-                label="Download for Android"
-              />
-            </div>
+          {hasAnyMembership ? (
+            <>
+              <h2 className="text-base font-semibold text-[var(--color-text)] mb-2">
+                Web is for academy owners today
+              </h2>
+              <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed mb-6">
+                You're signed in, but the dashboard is owner-only in this
+                release. Coaches and athletes can run their full workflow in
+                the Zovio mobile app.
+              </p>
+              <div className="space-y-2 mb-6">
+                <AppStoreLink
+                  href="https://apps.apple.com/app/zovio"
+                  label="Download for iOS"
+                />
+                <AppStoreLink
+                  href="https://play.google.com/store/apps/details?id=com.zovio.app"
+                  label="Download for Android"
+                />
+              </div>
+              <p className="text-xs text-[var(--color-text-muted)] mb-3">
+                Want to run your own academy?
+              </p>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => setCreateOpen(true)}
+              >
+                Create an academy
+              </Button>
+            </>
+          ) : (
+            <>
+              <h2 className="text-base font-semibold text-[var(--color-text)] mb-2">
+                Welcome to Zovio
+              </h2>
+              <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed mb-6">
+                You don't have any academies yet. Create your first one to
+                start scheduling sessions, inviting coaches, and collecting
+                fees.
+              </p>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => setCreateOpen(true)}
+              >
+                Create your first academy
+              </Button>
+            </>
           )}
+        </div>
 
+        <div className="text-center mt-6">
           <button
             type="button"
             onClick={() => void logout()}
-            className="text-[var(--color-text-muted)] hover:text-white text-sm"
+            className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
           >
             Sign out {user?.email ? `(${user.email})` : ''}
           </button>
         </div>
+
+        <CreateAcademyModal
+          open={createOpen}
+          onClose={() => setCreateOpen(false)}
+        />
       </div>
     </div>
   );
 }
 
-function AppStoreButton({ href, label }: { href: string; label: string }) {
+function AppStoreLink({ href, label }: { href: string; label: string }) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="block w-full rounded-[10px] bg-[var(--color-primary)] text-[var(--color-bg)] py-3 text-[15px] font-semibold hover:opacity-90"
+      className="block w-full rounded-md border border-[var(--color-border)] bg-[var(--color-bg-elevated)] text-[var(--color-text)] text-sm font-medium py-2 hover:bg-[var(--color-bg-subtle)] hover:border-[var(--color-border-strong)] transition-colors"
     >
       {label}
     </a>

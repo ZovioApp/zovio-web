@@ -6,6 +6,7 @@ import {
 } from '../../../lib/academies';
 import { LoadingScreen } from '../../../components/LoadingScreen';
 import { ErrorMessage } from '../../../components/ErrorMessage';
+import { Button } from '../../../components/Button';
 
 export default function Settings() {
   const { academyId } = useParams<{ academyId: string }>();
@@ -29,7 +30,6 @@ export default function Settings() {
 
   const save = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!academy) return;
     setIsSaving(true);
     setError(null);
     try {
@@ -38,8 +38,8 @@ export default function Settings() {
         name: String(form.get('name') ?? '').trim(),
         description: String(form.get('description') ?? ''),
         sport: String(form.get('sport') ?? ''),
-        timezone: String(form.get('timezone') ?? ''),
-        currency: String(form.get('currency') ?? ''),
+        timezone: String(form.get('timezone') ?? '').trim(),
+        currency: String(form.get('currency') ?? '').trim().toUpperCase(),
       });
       setAcademy(updated);
       setSavedAt(Date.now());
@@ -51,21 +51,23 @@ export default function Settings() {
   };
 
   return (
-    <div>
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold mb-1">Academy settings</h1>
-        <p className="text-[var(--color-text-muted)] text-sm">
-          Name, locale, and default currency for new sessions.
+    <div className="space-y-6">
+      <header>
+        <h1 className="text-2xl font-semibold text-[var(--color-text)]">
+          Academy settings
+        </h1>
+        <p className="text-sm text-[var(--color-text-muted)] mt-1">
+          Name, locale, and the default currency for new sessions.
         </p>
       </header>
 
       <form
         onSubmit={save}
-        className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 space-y-5 max-w-[560px]"
+        className="bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-lg p-6 space-y-4 max-w-[560px]"
       >
         <Field label="Name" name="name" defaultValue={academy.name} required />
         <Field
-          label="Sport / focus"
+          label="Sport or focus"
           name="sport"
           defaultValue={academy.sport ?? ''}
         />
@@ -76,28 +78,26 @@ export default function Settings() {
           textarea
         />
         <Field
-          label="Timezone (IANA, e.g. Asia/Colombo or Australia/Sydney)"
+          label="Timezone (IANA)"
           name="timezone"
           defaultValue={academy.timezone}
           required
         />
         <Field
-          label="Currency (3-letter ISO, e.g. LKR, AUD)"
+          label="Currency (ISO 4217)"
           name="currency"
           defaultValue={academy.currency}
           required
         />
 
         <div className="flex items-center gap-3 pt-2">
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="rounded-[10px] bg-[var(--color-primary)] text-[var(--color-bg)] px-5 py-2.5 text-sm font-semibold hover:opacity-90 disabled:opacity-50"
-          >
+          <Button type="submit" variant="primary" size="md" disabled={isSaving}>
             {isSaving ? 'Saving…' : 'Save changes'}
-          </button>
+          </Button>
           {savedAt && !isSaving && (
-            <span className="text-xs text-[var(--color-primary)]">Saved</span>
+            <span className="text-xs text-[var(--color-success)]">
+              Changes saved
+            </span>
           )}
         </div>
       </form>
@@ -119,11 +119,16 @@ function Field({
   textarea?: boolean;
 }) {
   const cls =
-    'w-full rounded-[10px] border border-white/10 bg-white/5 px-4 py-3 text-[15px] text-white outline-none transition-colors focus:border-[var(--color-primary)]';
+    'w-full rounded-md border border-[var(--color-border)] bg-[var(--color-bg-elevated)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] outline-none transition-colors focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20';
   return (
     <label className="block">
-      <span className="block text-xs font-semibold text-[var(--color-text-secondary)] mb-2 tracking-wide uppercase">
+      <span className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">
         {label}
+        {required && (
+          <span className="text-[var(--color-error)] ml-0.5" aria-hidden>
+            *
+          </span>
+        )}
       </span>
       {textarea ? (
         <textarea

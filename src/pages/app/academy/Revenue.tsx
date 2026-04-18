@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  academiesApi,
-  type RevenueReport,
-} from '../../../lib/academies';
+import { academiesApi, type RevenueReport } from '../../../lib/academies';
 import { LoadingScreen } from '../../../components/LoadingScreen';
 import { ErrorMessage } from '../../../components/ErrorMessage';
 
@@ -32,78 +29,126 @@ export default function Revenue() {
     })} ${report.currency}`;
 
   return (
-    <div>
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold mb-1">Revenue</h1>
-        <p className="text-[var(--color-text-muted)] text-sm">
+    <div className="space-y-10">
+      <header>
+        <h1 className="text-2xl font-semibold text-[var(--color-text)]">
+          Revenue
+        </h1>
+        <p className="text-sm text-[var(--color-text-muted)] mt-1">
           Paid enrolments only. Refunded and pending amounts are excluded.
         </p>
       </header>
 
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <StatCard label="Total income" value={fmt(report.totalIncome)} />
-        <StatCard
-          label="From sessions"
-          value={fmt(report.sessionIncome)}
-        />
+        <StatCard label="From sessions" value={fmt(report.sessionIncome)} />
         <StatCard label="From events" value={fmt(report.eventIncome)} />
       </section>
 
-      <section className="mb-10">
-        <h2 className="text-lg font-semibold mb-4">By coach</h2>
+      <section className="space-y-3">
+        <SectionHeader
+          title="By coach"
+          caption="Aggregated from sessions each coach conducted."
+        />
         {report.coachBreakdown.length === 0 ? (
           <EmptyRow label="No coach-led sessions have generated income yet." />
         ) : (
-          <Table
-            columns={['Coach', 'Sessions', 'Paid enrolments', 'Income']}
+          <DataTable
+            columns={[
+              { label: 'Coach', align: 'left' },
+              { label: 'Sessions', align: 'right' },
+              { label: 'Paid enrolments', align: 'right' },
+              { label: 'Income', align: 'right' },
+            ]}
           >
             {report.coachBreakdown.map((c) => (
               <tr
                 key={c.coachId}
-                className="border-t border-[var(--color-border)]"
+                className="border-t border-[var(--color-border-subtle)]"
               >
-                <td className="py-3 px-4">{c.coachName}</td>
-                <td className="py-3 px-4">{c.sessionCount}</td>
-                <td className="py-3 px-4">{c.paidEnrollmentCount}</td>
-                <td className="py-3 px-4 font-semibold">{fmt(c.income)}</td>
+                <td className="py-2.5 px-4 text-sm text-[var(--color-text)]">
+                  {c.coachName}
+                </td>
+                <td className="py-2.5 px-4 text-sm text-right tnum text-[var(--color-text-secondary)]">
+                  {c.sessionCount}
+                </td>
+                <td className="py-2.5 px-4 text-sm text-right tnum text-[var(--color-text-secondary)]">
+                  {c.paidEnrollmentCount}
+                </td>
+                <td className="py-2.5 px-4 text-sm text-right tnum font-medium text-[var(--color-text)]">
+                  {fmt(c.income)}
+                </td>
               </tr>
             ))}
-          </Table>
+          </DataTable>
         )}
 
-        <div className="mt-4 bg-[rgba(69,183,209,0.08)] border border-[rgba(69,183,209,0.3)] rounded-xl px-4 py-3 text-sm text-[var(--color-info)]">
-          Coach payouts through Zovio are coming soon. Today these figures are
-          an audit view — settle with your coaches outside the platform.
+        <div className="rounded-md bg-[var(--color-info-subtle-bg)] border border-[var(--color-info-subtle-border)] px-3 py-2.5 text-xs text-[var(--color-info)]">
+          Coach payouts through Zovio are coming soon. These figures are an
+          audit view — settle off-platform for now.
         </div>
       </section>
 
-      <section>
-        <h2 className="text-lg font-semibold mb-4">By session</h2>
+      <section className="space-y-3">
+        <SectionHeader title="By session" />
         {report.sessionBreakdown.length === 0 ? (
           <EmptyRow label="No sessions yet." />
         ) : (
-          <Table
-            columns={['Date', 'Session', 'Coach', 'Paid / enrolled', 'Income']}
+          <DataTable
+            columns={[
+              { label: 'Date', align: 'left' },
+              { label: 'Session', align: 'left' },
+              { label: 'Coach', align: 'left' },
+              { label: 'Paid / enrolled', align: 'right' },
+              { label: 'Income', align: 'right' },
+            ]}
           >
             {report.sessionBreakdown.map((s) => (
               <tr
                 key={s.sessionId}
-                className="border-t border-[var(--color-border)]"
+                className="border-t border-[var(--color-border-subtle)]"
               >
-                <td className="py-3 px-4 whitespace-nowrap">{s.date}</td>
-                <td className="py-3 px-4">{s.title}</td>
-                <td className="py-3 px-4 text-[var(--color-text-secondary)]">
+                <td className="py-2.5 px-4 text-sm tnum text-[var(--color-text-secondary)] whitespace-nowrap">
+                  {s.date}
+                </td>
+                <td className="py-2.5 px-4 text-sm text-[var(--color-text)]">
+                  {s.title}
+                </td>
+                <td className="py-2.5 px-4 text-sm text-[var(--color-text-secondary)]">
                   {s.coachName ?? '—'}
                 </td>
-                <td className="py-3 px-4">
+                <td className="py-2.5 px-4 text-sm text-right tnum text-[var(--color-text-secondary)]">
                   {s.paidCount} / {s.enrolledCount}
                 </td>
-                <td className="py-3 px-4 font-semibold">{fmt(s.income)}</td>
+                <td className="py-2.5 px-4 text-sm text-right tnum font-medium text-[var(--color-text)]">
+                  {fmt(s.income)}
+                </td>
               </tr>
             ))}
-          </Table>
+          </DataTable>
         )}
       </section>
+    </div>
+  );
+}
+
+function SectionHeader({
+  title,
+  caption,
+}: {
+  title: string;
+  caption?: string;
+}) {
+  return (
+    <div>
+      <h2 className="text-base font-semibold text-[var(--color-text)]">
+        {title}
+      </h2>
+      {caption && (
+        <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+          {caption}
+        </p>
+      )}
     </div>
   );
 }
@@ -116,33 +161,37 @@ function StatCard({
   value: string;
 }) {
   return (
-    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-5">
-      <div className="text-xs uppercase tracking-wide text-[var(--color-text-muted)] mb-1">
+    <div className="bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-lg px-4 py-3.5">
+      <div className="text-[11px] uppercase tracking-wider font-medium text-[var(--color-text-muted)] mb-1.5">
         {label}
       </div>
-      <div className="text-2xl font-bold">{value}</div>
+      <div className="text-xl font-semibold tnum text-[var(--color-text)]">
+        {value}
+      </div>
     </div>
   );
 }
 
-function Table({
+function DataTable({
   columns,
   children,
 }: {
-  columns: string[];
+  columns: { label: string; align: 'left' | 'right' }[];
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl overflow-x-auto">
-      <table className="w-full text-sm min-w-[480px]">
+    <div className="bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-lg overflow-x-auto">
+      <table className="w-full min-w-[520px]">
         <thead>
           <tr>
             {columns.map((c) => (
               <th
-                key={c}
-                className="text-left text-xs uppercase tracking-wide text-[var(--color-text-muted)] font-semibold px-4 py-3"
+                key={c.label}
+                className={`text-[11px] uppercase tracking-wider font-medium text-[var(--color-text-muted)] px-4 py-2.5 ${
+                  c.align === 'right' ? 'text-right' : 'text-left'
+                }`}
               >
-                {c}
+                {c.label}
               </th>
             ))}
           </tr>
@@ -155,7 +204,7 @@ function Table({
 
 function EmptyRow({ label }: { label: string }) {
   return (
-    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl px-4 py-6 text-sm text-[var(--color-text-muted)] text-center">
+    <div className="bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-lg px-4 py-8 text-sm text-[var(--color-text-muted)] text-center">
       {label}
     </div>
   );

@@ -1,38 +1,89 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary: #00D4AA;
-  --color-primary-dark: #00B894;
-  --color-accent: #4ECDC4;
-  --color-bg: #0A1628;
-  --color-bg-light: #0F1F38;
-  --color-card: #152240;
-  --color-surface: #1E3354;
-  --color-border: #1E3354;
-  --color-text: #FFFFFF;
-  --color-text-secondary: #8B9DC3;
-  --color-text-muted: #5A6F94;
-  --color-success: #00D4AA;
-  --color-warning: #FFB347;
-  --color-error: #FF6B6B;
-  --color-info: #45B7D1;
+  /* Surfaces */
+  --color-bg: #F8FAFC;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-subtle: #F1F5F9;
+
+  /* Borders */
+  --color-border: #E2E8F0;
+  --color-border-subtle: #EEF2F6;
+  --color-border-strong: #CBD5E1;
+
+  /* Text */
+  --color-text: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94A3B8;
+
+  /* Brand — refined teal, less neon than the marketing hero */
+  --color-primary: #0D9488;
+  --color-primary-hover: #0F766E;
+  --color-primary-active: #115E59;
+  --color-primary-subtle-bg: #F0FDFA;
+  --color-primary-subtle-border: #99F6E4;
+  --color-primary-contrast: #FFFFFF;
+
+  /* Semantic */
+  --color-success: #059669;
+  --color-success-subtle-bg: #ECFDF5;
+  --color-success-subtle-border: #A7F3D0;
+  --color-warning: #B45309;
+  --color-warning-subtle-bg: #FFFBEB;
+  --color-warning-subtle-border: #FCD34D;
+  --color-error: #DC2626;
+  --color-error-subtle-bg: #FEF2F2;
+  --color-error-subtle-border: #FECACA;
+  --color-info: #0369A1;
+  --color-info-subtle-bg: #F0F9FF;
+  --color-info-subtle-border: #BAE6FD;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 8px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 12px 24px -8px rgba(15, 23, 42, 0.1), 0 4px 8px -4px rgba(15, 23, 42, 0.06);
+
+  /* Typography */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --tnum: 'tnum' 1, 'cv11' 1;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  background-color: var(--color-bg);
 }
 
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
   background-color: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv11' 1, 'ss03' 1;
 }
 
 #root {
   min-height: 100vh;
 }
 
-.brand-gradient {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* Tabular numerals for data readability in tables / stats */
+.tnum {
+  font-feature-settings: var(--tnum);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Restrained brand wordmark — used for logo text, not section headings */
+.wordmark {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.wordmark-accent {
+  color: var(--color-primary);
 }
