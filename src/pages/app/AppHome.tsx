@@ -1,40 +1,40 @@
-import { useAuth } from '../../hooks/useAuth';
+import { Navigate } from 'react-router-dom';
+import { useAcademies } from '../../hooks/useAcademies';
+import { isOwnerRole } from '../../lib/academies';
+import { LoadingScreen } from '../../components/LoadingScreen';
+import { ErrorMessage } from '../../components/ErrorMessage';
+import AcademyPicker from './AcademyPicker';
+import LockScreen from './LockScreen';
 
+/**
+ * Post-login landing. Resolves the user's membership profile and decides:
+ *   - Multiple owner academies → AcademyPicker
+ *   - Single owner academy → /a/:id/overview
+ *   - No owner academies → LockScreen (coach / athlete / no memberships)
+ */
 export default function AppHome() {
-  const { user, logout } = useAuth();
+  const { academies, isLoading, error } = useAcademies();
 
-  return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b border-[var(--color-border)] px-6 py-4 flex items-center justify-between">
-        <span className="brand-gradient text-xl font-bold">Zovio</span>
-        <div className="flex items-center gap-4 text-sm">
-          <span className="text-[var(--color-text-secondary)]">
-            {user?.name}
-          </span>
-          <button
-            type="button"
-            onClick={() => void logout()}
-            className="text-[var(--color-text-muted)] hover:text-white transition-colors"
-          >
-            Sign out
-          </button>
+  if (isLoading) return <LoadingScreen />;
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="max-w-md w-full">
+          <ErrorMessage message={error} />
         </div>
-      </header>
+      </div>
+    );
+  }
 
-      <main className="flex-1 flex items-center justify-center px-6">
-        <div className="max-w-[520px] text-center">
-          <h1 className="text-3xl font-bold mb-3">
-            Welcome, {user?.name?.split(' ')[0] ?? 'there'}
-          </h1>
-          <p className="text-[var(--color-text-secondary)] leading-relaxed">
-            Your owner dashboard is coming together. Revenue breakdowns,
-            per-academy payouts, and team management land in the next release.
-          </p>
-          <p className="text-[var(--color-text-muted)] text-sm mt-6">
-            In the meantime, use the Zovio mobile app to run your sessions.
-          </p>
-        </div>
-      </main>
-    </div>
-  );
+  const ownedAcademies = academies.filter((a) => isOwnerRole(a.role));
+
+  if (ownedAcademies.length === 0) {
+    return <LockScreen hasAnyMembership={academies.length > 0} />;
+  }
+
+  if (ownedAcademies.length === 1) {
+    return <Navigate to={`/app/a/${ownedAcademies[0].id}/overview`} replace />;
+  }
+
+  return <AcademyPicker academies={ownedAcademies} />;
 }
