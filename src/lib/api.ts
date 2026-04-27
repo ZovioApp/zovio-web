@@ -2,11 +2,13 @@ import { env } from './env';
 
 export class ApiError extends Error {
   readonly status: number;
+  readonly code?: string;
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, code?: string) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -35,9 +37,9 @@ export async function api<T = unknown>(
   const payload = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    const message =
-      (payload as { message?: string }).message ?? `Request failed (${res.status})`;
-    throw new ApiError(res.status, message);
+    const body = payload as { message?: string; code?: string };
+    const message = body.message ?? `Request failed (${res.status})`;
+    throw new ApiError(res.status, message, body.code);
   }
 
   return payload as T;

@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { ApiError } from '../lib/api';
+import { api, ApiError } from '../lib/api';
 import { Button } from '../components/Button';
 import { ErrorMessage } from '../components/ErrorMessage';
 
@@ -14,19 +14,44 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+    setUnverifiedEmail(null);
+    setResendSent(false);
     setIsSubmitting(true);
     try {
       await login(email, password);
       navigate('/app', { replace: true });
     } catch (err) {
-      const message =
-        err instanceof ApiError ? err.message : 'Unable to sign in';
-      setError(message);
+      if (err instanceof ApiError && err.code === 'EMAIL_NOT_VERIFIED') {
+        setUnverifiedEmail(email);
+      } else {
+        const message =
+          err instanceof ApiError ? err.message : 'Unable to sign in';
+        setError(message);
+      }
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!unverifiedEmail || isResending) return;
+    setIsResending(true);
+    try {
+      await api('POST', '/api/auth/resend-verification', {
+        email: unverifiedEmail,
+      });
+      setResendSent(true);
+    } catch {
+      setResendSent(true);
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -74,6 +99,29 @@ export default function Login() {
           </Field>
 
           {error && <ErrorMessage message={error} />}
+
+          {unverifiedEmail && (
+            <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <p className="font-medium">Email not verified</p>
+              <p className="mt-0.5 text-amber-700">
+                Check your inbox for a verification link, or request a new one.
+              </p>
+              {resendSent ? (
+                <p className="mt-2 font-medium text-amber-900">
+                  Verification email sent — check your inbox.
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={isResending}
+                  className="mt-2 font-medium underline underline-offset-2 hover:no-underline disabled:opacity-60"
+                >
+                  {isResending ? 'Sending…' : 'Resend verification email'}
+                </button>
+              )}
+            </div>
+          )}
 
           <Button
             type="submit"

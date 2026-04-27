@@ -8,6 +8,7 @@ import Landing from './pages/Landing';
 import Invite from './pages/Invite';
 import PaymentResult from './pages/PaymentResult';
 import Login from './pages/Login';
+import VerifyEmail from './pages/VerifyEmail';
 import NotFound from './pages/NotFound';
 import AppHome from './pages/app/AppHome';
 import Overview from './pages/app/academy/Overview';
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/invite/:code" element={<Invite />} />
           <Route path="/payment-result" element={<PaymentResult />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route
             path="/login"
             element={
