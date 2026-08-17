@@ -133,6 +133,14 @@ export const academiesApi = {
   ) => api<AcademySummary>('PUT', `/api/academies/${id}`, body),
   sessions: (id: string) =>
     api<SessionSummary[]>('GET', `/api/academies/${id}/sessions`),
+  leave: (id: string) =>
+    api<{ message: string }>('POST', `/api/academies/${id}/leave`),
+  transferOwnership: (id: string, newOwnerUserId: string) =>
+    api<{ message: string }>('POST', `/api/academies/${id}/transfer-ownership`, {
+      newOwnerUserId,
+    }),
+  remove: (id: string) =>
+    api<{ message: string }>('DELETE', `/api/academies/${id}`),
 };
 
 export const payoutsApi = {

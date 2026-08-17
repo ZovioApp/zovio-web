@@ -88,6 +88,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
               >
                 Payouts
               </SidebarLink>
+              <SidebarLink
+                to={`/app/a/${currentAcademy.id}/settings/subscription`}
+              >
+                Subscription
+              </SidebarLink>
             </nav>
           </aside>
         )}

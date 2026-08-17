@@ -5,20 +5,13 @@ import { Button } from './Button';
 import { ErrorMessage } from './ErrorMessage';
 import { api, ApiError } from '../lib/api';
 import type { AcademySummary } from '../lib/academies';
+import { TIMEZONE_SUGGESTIONS } from '../lib/timezones';
 
 interface Props {
   open: boolean;
   onClose: () => void;
   onCreated?: (academy: AcademySummary) => void;
 }
-
-const TIMEZONE_SUGGESTIONS = [
-  'Asia/Colombo',
-  'Australia/Sydney',
-  'Australia/Melbourne',
-  'Australia/Brisbane',
-  'Australia/Perth',
-];
 
 const CURRENCY_SUGGESTIONS = ['LKR', 'AUD', 'USD', 'GBP', 'INR'];
 

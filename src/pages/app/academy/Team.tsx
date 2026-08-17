@@ -4,6 +4,7 @@ import {
   academiesApi,
   type AcademyMember,
   type AcademyRole,
+  type AcademySummary,
 } from '../../../lib/academies';
 import { LoadingScreen } from '../../../components/LoadingScreen';
 import { ErrorMessage } from '../../../components/ErrorMessage';
@@ -13,15 +14,18 @@ import { api } from '../../../lib/api';
 
 export default function Team() {
   const { academyId } = useParams<{ academyId: string }>();
+  const [academy, setAcademy] = useState<AcademySummary | null>(null);
   const [members, setMembers] = useState<AcademyMember[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(() => {
     if (!academyId) return;
     setError(null);
-    academiesApi
-      .members(academyId)
-      .then(setMembers)
+    Promise.all([academiesApi.get(academyId), academiesApi.members(academyId)])
+      .then(([a, m]) => {
+        setAcademy(a);
+        setMembers(m);
+      })
       .catch((err) =>
         setError(err instanceof Error ? err.message : 'Failed to load team'),
       );
@@ -30,7 +34,7 @@ export default function Team() {
   useEffect(load, [load]);
 
   if (error && !members) return <ErrorState message={error} onRetry={load} />;
-  if (!members || !academyId) return <LoadingScreen />;
+  if (!members || !academy || !academyId) return <LoadingScreen />;
 
   const active = members.filter((m) => m.status === 'active');
   const pending = members.filter((m) => m.status === 'pending');
@@ -46,7 +50,11 @@ export default function Team() {
         </p>
       </header>
 
-      <InviteCard academyId={academyId} onInvited={load} />
+      <InviteCard
+        academyId={academyId}
+        viewerRole={academy.role}
+        onInvited={load}
+      />
 
       <MemberSection
         title="Active members"
@@ -67,11 +75,14 @@ export default function Team() {
 
 function InviteCard({
   academyId,
+  viewerRole,
   onInvited,
 }: {
   academyId: string;
+  viewerRole: AcademyRole;
   onInvited: () => void;
 }) {
+  const canInviteCoOwner = viewerRole === 'primary_owner';
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<'owner' | 'coach' | 'athlete'>('athlete');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -136,7 +147,9 @@ function InviteCard({
           >
             <option value="athlete">Athlete</option>
             <option value="coach">Coach</option>
-            <option value="owner">Co-owner</option>
+            {/* Only the primary owner may invite co-owners — the backend
+                403s otherwise, so co-owner viewers never see the option. */}
+            {canInviteCoOwner && <option value="owner">Co-owner</option>}
           </select>
         </label>
         <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>

@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { payoutsApi, type PayoutStatus } from '../../../lib/academies';
+import {
+  academiesApi,
+  payoutsApi,
+  type AcademySummary,
+  type PayoutStatus,
+} from '../../../lib/academies';
 import { LoadingScreen } from '../../../components/LoadingScreen';
 import { ErrorMessage } from '../../../components/ErrorMessage';
 import { ErrorState } from '../../../components/ErrorState';
@@ -8,6 +13,7 @@ import { Button } from '../../../components/Button';
 
 export default function Payouts() {
   const { academyId } = useParams<{ academyId: string }>();
+  const [academy, setAcademy] = useState<AcademySummary | null>(null);
   const [status, setStatus] = useState<PayoutStatus | null>(null);
   // Load failures replace the page (with retry); action failures render
   // inline so the page and its buttons stay usable.
@@ -18,9 +24,11 @@ export default function Payouts() {
   const load = useCallback(() => {
     if (!academyId) return;
     setLoadError(null);
-    payoutsApi
-      .status(academyId)
-      .then(setStatus)
+    Promise.all([academiesApi.get(academyId), payoutsApi.status(academyId)])
+      .then(([a, s]) => {
+        setAcademy(a);
+        setStatus(s);
+      })
       .catch((err) =>
         setLoadError(err instanceof Error ? err.message : 'Failed to load'),
       );
@@ -31,7 +39,9 @@ export default function Payouts() {
   if (loadError && !status) {
     return <ErrorState message={loadError} onRetry={load} />;
   }
-  if (!status || !academyId) return <LoadingScreen />;
+  if (!status || !academy || !academyId) return <LoadingScreen />;
+
+  const isPrimaryOwner = academy.role === 'primary_owner';
 
   const onboard = async () => {
     setActionError(null);
@@ -120,7 +130,12 @@ export default function Payouts() {
             variant="primary"
             size="md"
             onClick={() => void onboard()}
-            disabled={isWorking}
+            disabled={isWorking || !isPrimaryOwner}
+            title={
+              isPrimaryOwner
+                ? undefined
+                : 'Only the primary owner can change this.'
+            }
           >
             {isWorking
               ? 'Working…'
@@ -136,7 +151,12 @@ export default function Payouts() {
               variant="secondary"
               size="md"
               onClick={() => void unlink()}
-              disabled={isWorking}
+              disabled={isWorking || !isPrimaryOwner}
+              title={
+                isPrimaryOwner
+                  ? undefined
+                  : 'Only the primary owner can change this.'
+              }
             >
               Switch to manual
             </Button>

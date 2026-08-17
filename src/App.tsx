@@ -21,6 +21,7 @@ import Sessions from './pages/app/academy/Sessions';
 import Settings from './pages/app/academy/Settings';
 import Team from './pages/app/academy/Team';
 import Payouts from './pages/app/academy/Payouts';
+import Subscription from './pages/app/academy/Subscription';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -85,6 +86,10 @@ export default function App() {
                     <Route path="settings" element={<Settings />} />
                     <Route path="settings/team" element={<Team />} />
                     <Route path="settings/payouts" element={<Payouts />} />
+                    <Route
+                      path="settings/subscription"
+                      element={<Subscription />}
+                    />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </AppLayout>
