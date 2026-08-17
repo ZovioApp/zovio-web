@@ -98,6 +98,15 @@ export default function Login() {
             />
           </Field>
 
+          <p className="text-right -mt-2">
+            <Link
+              to="/forgot-password"
+              className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text)] underline underline-offset-2"
+            >
+              Forgot password?
+            </Link>
+          </p>
+
           {error && <ErrorMessage message={error} />}
 
           {unverifiedEmail && (

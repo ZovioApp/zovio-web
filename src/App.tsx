@@ -8,6 +8,8 @@ import Landing from './pages/Landing';
 import Invite from './pages/Invite';
 import PaymentResult from './pages/PaymentResult';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import VerifyEmail from './pages/VerifyEmail';
 import NotFound from './pages/NotFound';
 import AppHome from './pages/app/AppHome';
@@ -42,6 +44,9 @@ export default function App() {
           <Route path="/invite/:code" element={<Invite />} />
           <Route path="/payment-result" element={<PaymentResult />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          {/* Password-reset emails link here (PASSWORD_RESET_URL_BASE) */}
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route
             path="/login"
             element={
