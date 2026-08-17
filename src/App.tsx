@@ -5,6 +5,8 @@ import { StagingBanner } from './components/StagingBanner';
 import { LoadingScreen } from './components/LoadingScreen';
 import { AppLayout } from './components/AppLayout';
 import Landing from './pages/Landing';
+import Terms from './pages/legal/Terms';
+import Privacy from './pages/legal/Privacy';
 import Invite from './pages/Invite';
 import PaymentResult from './pages/PaymentResult';
 import Login from './pages/Login';
@@ -41,6 +43,9 @@ export default function App() {
         <StagingBanner />
         <Routes>
           <Route path="/" element={<Landing />} />
+          {/* Linked from the mobile app's Profile screen and store listings */}
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
           <Route path="/invite/:code" element={<Invite />} />
           <Route path="/payment-result" element={<PaymentResult />} />
           <Route path="/verify-email" element={<VerifyEmail />} />

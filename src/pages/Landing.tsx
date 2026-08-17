@@ -95,12 +95,26 @@ export default function Landing() {
       <footer className="border-t border-[var(--color-border)] bg-[var(--color-bg-elevated)]">
         <div className="max-w-[1120px] mx-auto px-6 h-14 flex items-center justify-between text-xs text-[var(--color-text-muted)]">
           <span>&copy; 2026 Zovio</span>
-          <Link
-            to="/login"
-            className="hover:text-[var(--color-text)] transition-colors"
-          >
-            Sign in
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              to="/terms"
+              className="hover:text-[var(--color-text)] transition-colors"
+            >
+              Terms
+            </Link>
+            <Link
+              to="/privacy"
+              className="hover:text-[var(--color-text)] transition-colors"
+            >
+              Privacy
+            </Link>
+            <Link
+              to="/login"
+              className="hover:text-[var(--color-text)] transition-colors"
+            >
+              Sign in
+            </Link>
+          </div>
         </div>
       </footer>
     </div>

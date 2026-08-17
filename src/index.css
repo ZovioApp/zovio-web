@@ -87,3 +87,24 @@ body {
 .wordmark-accent {
   color: var(--color-primary);
 }
+
+/* Legal pages (/terms, /privacy) — long-form document typography */
+.legal-prose h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 1.75rem 0 0.5rem;
+}
+
+.legal-prose p {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.legal-prose a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
