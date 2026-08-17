@@ -23,10 +23,10 @@ const environment = resolveEnvironment(import.meta.env.VITE_ENVIRONMENT);
 
 export const env: AppEnv = {
   apiUrl: required('VITE_API_URL', import.meta.env.VITE_API_URL),
-  stripePublishableKey: required(
-    'VITE_STRIPE_PUBLISHABLE_KEY',
-    import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
-  ),
+  // Optional: nothing in the web app loads Stripe.js today, so a missing
+  // key must not white-screen the whole site at boot. Re-tighten to
+  // required() if client-side Stripe is ever added.
+  stripePublishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? '',
   environment,
   isProduction: environment === 'production',
 };

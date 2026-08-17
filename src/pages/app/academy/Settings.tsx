@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   academiesApi,
@@ -11,9 +11,14 @@ import { Button } from '../../../components/Button';
 export default function Settings() {
   const { academyId } = useParams<{ academyId: string }>();
   const [academy, setAcademy] = useState<AcademySummary | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [savedAt, setSavedAt] = useState<number | null>(null);
+  // Load and save errors are separate on purpose: a failed SAVE must render
+  // inline and keep the form (and the user's input) mounted — only a failed
+  // LOAD may replace the page.
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!academyId) return;
@@ -21,17 +26,25 @@ export default function Settings() {
       .get(academyId)
       .then(setAcademy)
       .catch((err) =>
-        setError(err instanceof Error ? err.message : 'Failed to load'),
+        setLoadError(err instanceof Error ? err.message : 'Failed to load'),
       );
   }, [academyId]);
 
-  if (error) return <ErrorMessage message={error} />;
+  useEffect(
+    () => () => {
+      if (savedTimer.current) clearTimeout(savedTimer.current);
+    },
+    [],
+  );
+
+  if (loadError) return <ErrorMessage message={loadError} />;
   if (!academy || !academyId) return <LoadingScreen />;
 
   const save = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSaving(true);
-    setError(null);
+    setSaveError(null);
+    setSaved(false);
     try {
       const form = new FormData(e.currentTarget);
       const updated = await academiesApi.update(academyId, {
@@ -42,9 +55,11 @@ export default function Settings() {
         currency: String(form.get('currency') ?? '').trim().toUpperCase(),
       });
       setAcademy(updated);
-      setSavedAt(Date.now());
+      setSaved(true);
+      if (savedTimer.current) clearTimeout(savedTimer.current);
+      savedTimer.current = setTimeout(() => setSaved(false), 4000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save');
+      setSaveError(err instanceof Error ? err.message : 'Failed to save');
     } finally {
       setIsSaving(false);
     }
@@ -90,12 +105,14 @@ export default function Settings() {
           required
         />
 
+        {saveError && <ErrorMessage message={saveError} />}
+
         <div className="flex items-center gap-3 pt-2">
           <Button type="submit" variant="primary" size="md" disabled={isSaving}>
             {isSaving ? 'Saving…' : 'Save changes'}
           </Button>
-          {savedAt && !isSaving && (
-            <span className="text-xs text-[var(--color-success)]">
+          {saved && !isSaving && (
+            <span className="text-xs text-[var(--color-success)]" role="status">
               Changes saved
             </span>
           )}
