@@ -3,49 +3,64 @@ import { useParams } from 'react-router-dom';
 import { payoutsApi, type PayoutStatus } from '../../../lib/academies';
 import { LoadingScreen } from '../../../components/LoadingScreen';
 import { ErrorMessage } from '../../../components/ErrorMessage';
+import { ErrorState } from '../../../components/ErrorState';
 import { Button } from '../../../components/Button';
 
 export default function Payouts() {
   const { academyId } = useParams<{ academyId: string }>();
   const [status, setStatus] = useState<PayoutStatus | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // Load failures replace the page (with retry); action failures render
+  // inline so the page and its buttons stay usable.
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [isWorking, setIsWorking] = useState(false);
 
   const load = useCallback(() => {
     if (!academyId) return;
+    setLoadError(null);
     payoutsApi
       .status(academyId)
       .then(setStatus)
       .catch((err) =>
-        setError(err instanceof Error ? err.message : 'Failed to load'),
+        setLoadError(err instanceof Error ? err.message : 'Failed to load'),
       );
   }, [academyId]);
 
   useEffect(load, [load]);
 
-  if (error) return <ErrorMessage message={error} />;
+  if (loadError && !status) {
+    return <ErrorState message={loadError} onRetry={load} />;
+  }
   if (!status || !academyId) return <LoadingScreen />;
 
   const onboard = async () => {
-    setError(null);
+    setActionError(null);
     setIsWorking(true);
     try {
       const res = await payoutsApi.onboard(academyId);
       window.location.assign(res.url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Onboarding failed');
+      setActionError(err instanceof Error ? err.message : 'Onboarding failed');
       setIsWorking(false);
     }
   };
 
   const unlink = async () => {
-    setError(null);
+    // Destructive: turns off the academy's card-payment rail.
+    if (
+      !window.confirm(
+        'Switch to manual settlement? Students will no longer pay through the platform until Stripe is reconnected.',
+      )
+    ) {
+      return;
+    }
+    setActionError(null);
     setIsWorking(true);
     try {
       await payoutsApi.unlink(academyId);
       load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unlink failed');
+      setActionError(err instanceof Error ? err.message : 'Unlink failed');
     } finally {
       setIsWorking(false);
     }
@@ -94,9 +109,9 @@ export default function Payouts() {
               : 'This academy runs on manual settlement. Enrolments and attendance still work — students just don\u2019t pay through the platform.'}
         </p>
 
-        {error && (
+        {actionError && (
           <div className="mb-4">
-            <ErrorMessage message={error} />
+            <ErrorMessage message={actionError} />
           </div>
         )}
 
@@ -107,11 +122,13 @@ export default function Payouts() {
             onClick={() => void onboard()}
             disabled={isWorking}
           >
-            {status.stripeConnectedAccountId
-              ? activeConnect
-                ? 'Manage Stripe account'
-                : 'Finish Stripe onboarding'
-              : 'Connect with Stripe'}
+            {isWorking
+              ? 'Working…'
+              : status.stripeConnectedAccountId
+                ? activeConnect
+                  ? 'Manage Stripe account'
+                  : 'Finish Stripe onboarding'
+                : 'Connect with Stripe'}
           </Button>
 
           {status.stripeConnectedAccountId && (

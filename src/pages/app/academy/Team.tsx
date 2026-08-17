@@ -7,6 +7,7 @@ import {
 } from '../../../lib/academies';
 import { LoadingScreen } from '../../../components/LoadingScreen';
 import { ErrorMessage } from '../../../components/ErrorMessage';
+import { ErrorState } from '../../../components/ErrorState';
 import { Button } from '../../../components/Button';
 import { api } from '../../../lib/api';
 
@@ -17,6 +18,7 @@ export default function Team() {
 
   const load = useCallback(() => {
     if (!academyId) return;
+    setError(null);
     academiesApi
       .members(academyId)
       .then(setMembers)
@@ -27,7 +29,7 @@ export default function Team() {
 
   useEffect(load, [load]);
 
-  if (error) return <ErrorMessage message={error} />;
+  if (error && !members) return <ErrorState message={error} onRetry={load} />;
   if (!members || !academyId) return <LoadingScreen />;
 
   const active = members.filter((m) => m.status === 'active');

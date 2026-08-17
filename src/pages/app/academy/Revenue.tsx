@@ -1,16 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { academiesApi, type RevenueReport } from '../../../lib/academies';
 import { LoadingScreen } from '../../../components/LoadingScreen';
-import { ErrorMessage } from '../../../components/ErrorMessage';
+import { ErrorState } from '../../../components/ErrorState';
 
 export default function Revenue() {
   const { academyId } = useParams<{ academyId: string }>();
   const [report, setReport] = useState<RevenueReport | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!academyId) return;
+    setError(null);
+    setReport(null);
     academiesApi
       .revenue(academyId)
       .then(setReport)
@@ -19,7 +21,9 @@ export default function Revenue() {
       );
   }, [academyId]);
 
-  if (error) return <ErrorMessage message={error} />;
+  useEffect(load, [load]);
+
+  if (error) return <ErrorState message={error} onRetry={load} />;
   if (!report) return <LoadingScreen />;
 
   const fmt = (n: number) =>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   academiesApi,
@@ -6,6 +6,7 @@ import {
 } from '../../../lib/academies';
 import { LoadingScreen } from '../../../components/LoadingScreen';
 import { ErrorMessage } from '../../../components/ErrorMessage';
+import { ErrorState } from '../../../components/ErrorState';
 import { Button } from '../../../components/Button';
 
 export default function Settings() {
@@ -20,8 +21,9 @@ export default function Settings() {
   const [isSaving, setIsSaving] = useState(false);
   const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!academyId) return;
+    setLoadError(null);
     academiesApi
       .get(academyId)
       .then(setAcademy)
@@ -30,6 +32,8 @@ export default function Settings() {
       );
   }, [academyId]);
 
+  useEffect(load, [load]);
+
   useEffect(
     () => () => {
       if (savedTimer.current) clearTimeout(savedTimer.current);
@@ -37,7 +41,7 @@ export default function Settings() {
     [],
   );
 
-  if (loadError) return <ErrorMessage message={loadError} />;
+  if (loadError) return <ErrorState message={loadError} onRetry={load} />;
   if (!academy || !academyId) return <LoadingScreen />;
 
   const save = async (e: FormEvent<HTMLFormElement>) => {

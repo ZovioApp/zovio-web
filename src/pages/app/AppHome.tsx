@@ -2,7 +2,7 @@ import { Navigate } from 'react-router-dom';
 import { useAcademies } from '../../hooks/useAcademies';
 import { isOwnerRole } from '../../lib/academies';
 import { LoadingScreen } from '../../components/LoadingScreen';
-import { ErrorMessage } from '../../components/ErrorMessage';
+import { ErrorState } from '../../components/ErrorState';
 import AcademyPicker from './AcademyPicker';
 import LockScreen from './LockScreen';
 
@@ -13,14 +13,14 @@ import LockScreen from './LockScreen';
  *   - No owner academies → LockScreen (coach / athlete / no memberships)
  */
 export default function AppHome() {
-  const { academies, isLoading, error } = useAcademies();
+  const { academies, isLoading, error, reload } = useAcademies();
 
   if (isLoading) return <LoadingScreen />;
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
         <div className="max-w-md w-full">
-          <ErrorMessage message={error} />
+          <ErrorState message={error} onRetry={() => void reload()} />
         </div>
       </div>
     );

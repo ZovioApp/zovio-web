@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   academiesApi,
@@ -6,7 +6,7 @@ import {
   type DashboardStats,
 } from '../../../lib/academies';
 import { LoadingScreen } from '../../../components/LoadingScreen';
-import { ErrorMessage } from '../../../components/ErrorMessage';
+import { ErrorState } from '../../../components/ErrorState';
 
 export default function Overview() {
   const { academyId } = useParams<{ academyId: string }>();
@@ -14,8 +14,11 @@ export default function Overview() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!academyId) return;
+    setError(null);
+    setAcademy(null);
+    setStats(null);
     Promise.all([academiesApi.get(academyId), academiesApi.stats(academyId)])
       .then(([a, s]) => {
         setAcademy(a);
@@ -26,7 +29,9 @@ export default function Overview() {
       );
   }, [academyId]);
 
-  if (error) return <ErrorMessage message={error} />;
+  useEffect(load, [load]);
+
+  if (error) return <ErrorState message={error} onRetry={load} />;
   if (!academy || !stats) return <LoadingScreen />;
 
   return (
